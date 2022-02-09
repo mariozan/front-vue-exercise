@@ -5,17 +5,26 @@
     <title>Vue Dev Exercise</title>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    
 </head>
 <body>
-<div id="app">
-    <div class="w-full h-screen flex items-center justify-center">
-        <div class="grid gap-4 grid-cols-3">
-            <div v-for="(value,key) in values" 
-                 @click="play(key)"
-                 class="border w-48 h-48 flex items-center justify-center text-4xl hover:bg-gray-100 cursor-pointer">
-                {{ value }}
+    <div id="app">
+        <div class="flex items-center justify-center">
+            
+            <button @click="restart" class="bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Reiniciar</button>
+            <button @click="autoplay" class="bg-yellow-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Jugar</button>
+            <button @click="redomove" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Deshacer</button>    
+            <button @click="machinemode" class="bg-green-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Maquina</button> 
+        </div>    
+        <div class="w-full h-screen flex items-center justify-center">
+            <div class="grid gap-4 grid-cols-3">
+                <div v-for="(value,key) in values" 
+                @click="play(key)"
+                class="border w-48 h-48 flex items-center justify-center text-4xl hover:bg-gray-100 cursor-pointer">
+                <i :class="value"></i>
             </div>
-        </div>
+        </div>          
     </div>
 </div>
 <script>
@@ -33,13 +42,109 @@
                 8: '',
                 9: '',
             },
-            current: 'X'
+            current: 'fas fa-anchor',
+            temp_array: Array.from({length: 9}, (_, i) => i + 1),
+            temp_moves: [],
+            moves_to_win: [[1,2,3],[4,5,6],[7,8,9],[1,4,7],[2,5,8],[3,6,9],[1,5,9],[3,5,7]],
+            player1_moves: [],
+            player2_moves: [],
+            current_player:1,
+            playmachinemode: false
         }),
         methods:{
             play(key){
                 if(! this.values[key]) {
                     this.values[key] = this.current
-                    this.current  = (this.current === 'X' ? 'O' : 'X')
+                    this.temp_moves.push(key)
+                    let index = this.temp_array.indexOf(Number(key))
+                    this.temp_array.splice(index, 1)
+                    if(this.current_player == 1){
+                        this.player1_moves.push(Number(key))
+                        this.sound();
+                        this.checkwin(this.player1_moves)                        
+                    }else{
+                        this.player2_moves.push(Number(key))
+                        this.checkwin(this.player2_moves)                        
+                    }
+                    this.current  = (this.current === 'fas fa-anchor' ? 'fab fa-angellist' : 'fas fa-anchor')
+                    this.current_player = this.current_player == 1 ? 2:1
+                }
+                
+                this.checkmachinemode()
+            },
+            restart(){
+                this.values = {
+                    1: '',
+                    2: '',
+                    3: '',
+                    4: '',
+                    5: '',
+                    6: '',
+                    7: '',
+                    8: '',
+                    9: '',
+                }
+                
+                this.player1_moves = []
+                this.player2_moves = []
+                this.temp_moves = []
+                
+                
+            },
+            autoplay(){
+                // let key = this.temp_array[Math.floor(Math.random() * (this.temp_array.length)+1)]
+                let key = Math.floor(Math.random() * (this.temp_array.length))
+                console.log(key)
+                key = key == 0 ? 1: key
+                let value = this.temp_array[key]
+                console.log(value)
+                this.play(value)
+            },
+            sound(){
+                const music = new Audio('http://www.kalmanovitz.co.il/courses/English/construction/Assets/Mousclik.wav');
+                music.play();
+                music.playbackRate = 2;
+            },
+            redomove(){
+                this.values[this.temp_moves[this.temp_moves.length-1]] = ''
+                let index = this.temp_moves.indexOf(Number(this.temp_moves[this.temp_moves.length-1]))
+                this.temp_moves.splice(index, 1)
+            },
+            checkwin(player_array){
+                
+                let count=0;
+                if(player_array.length >= 3){
+                    
+                    this.moves_to_win.forEach(array => {      
+                        array.forEach(element => {                  
+                            if(player_array.includes(Number(element))){
+                                count++
+                            }                            
+                        })
+                        if(count <3){
+                            count=0
+                        }                       
+                    });
+                    if(count >=3){
+                        alert("El juador "+ this.current_player + " ha ganado el juego");
+                        this.restart()
+                    }
+                }
+                
+                if(this.temp_moves.length == 9){
+                    console.log(this.temp_moves.length)
+                    alert("Empate")
+                    this.restart()
+                    
+                }
+            },
+            machinemode(){
+                alert("comienza modo maquina")
+                this.playmachinemode = true
+            },
+            checkmachinemode(){
+                if(this.playmachinemode && this.current_player == 2){
+                    this.autoplay()
                 }
             }
         }
