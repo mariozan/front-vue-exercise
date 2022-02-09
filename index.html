@@ -6,6 +6,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     
 </head>
 <body>
@@ -88,17 +89,24 @@
                 this.player1_moves = []
                 this.player2_moves = []
                 this.temp_moves = []
-                
+                this.temp_array = Array.from({length: 9}, (_, i) => i + 1),
+                this.playmachinemode = false
+                this.current_player=1       
                 
             },
             autoplay(){
                 // let key = this.temp_array[Math.floor(Math.random() * (this.temp_array.length)+1)]
+                console.log(this.temp_array)
                 let key = Math.floor(Math.random() * (this.temp_array.length))
-                console.log(key)
-                key = key == 0 ? 1: key
+                // console.log(key)
+                // key = key == 0 ? 1: key
                 let value = this.temp_array[key]
-                console.log(value)
-                this.play(value)
+                // console.log(value)
+                if(value){
+                    this.play(value)
+                }else{
+                    this.autoplay()
+                }
             },
             sound(){
                 const music = new Audio('http://www.kalmanovitz.co.il/courses/English/construction/Assets/Mousclik.wav');
@@ -126,20 +134,35 @@
                         }                       
                     });
                     if(count >=3){
-                        alert("El juador "+ this.current_player + " ha ganado el juego");
                         this.restart()
+                        swal({
+                            title: "¡Felicitaciones!",
+                            text: "¡El juador "+ this.current_player + " ha ganado el juego",
+                            icon: "success",
+                        });
+                        // alert("El juador "+ this.current_player + " ha ganado el juego");
                     }
                 }
                 
                 if(this.temp_moves.length == 9){
-                    console.log(this.temp_moves.length)
-                    alert("Empate")
+                    // console.log(this.temp_moves.length)
+                    // alert("Empate")
+                    swal({
+                        title: "Upps!",
+                        text: "¡Tenemos un empate!",
+                        icon: "success",
+                    });
                     this.restart()
                     
                 }
             },
             machinemode(){
-                alert("comienza modo maquina")
+                swal({
+                    title: "Wao!",
+                    text: "Comienza modo maquina!",
+                    icon: "success",
+                });
+                this.restart()
                 this.playmachinemode = true
             },
             checkmachinemode(){
